@@ -1,0 +1,32 @@
+RewriteOptions inherit
+<Files .htaccess>
+	Order allow,deny
+	Deny from all
+</Files>
+RedirectMatch 404 ^/includes(/?|/.*)$
+# Nosniff and other stuff
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options DENY
+# Remove PHP version in header
+Header always unset X-Powered-By
+Header unset X-Powered-By
+# Disable directory browsing
+Options All -Indexes
+# Disable trying to backdoor stuff
+<FilesMatch "\.(?i:php)$">
+<IfModule !mod_authz_core.c>
+Order allow,deny
+Deny from all
+</IfModule>
+</FilesMatch>
+# Rewrite URLs so they look fancy n stuff
+RewriteEngine On
+# Remove trace & track ability
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+RewriteRule .* - [F]
+# Rewrite HTML rules to get rid of .html
+RewriteCond %{THE_REQUEST} /([^.]+)\.html [NC]
+RewriteRule ^ /%1 [NC,L,R]
+
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^ %{REQUEST_URI}.html [NC,L]
